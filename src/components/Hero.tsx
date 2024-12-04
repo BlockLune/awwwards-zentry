@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
 import Button from "./Button";
 import { TiLocationArrow } from "react-icons/ti";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 function Hero() {
   const [currentIndex, setCurrentIndex] = useState(1);
@@ -9,7 +11,7 @@ function Hero() {
   const [nLoadedVideos, setNLoadedVideos] = useState(0);
 
   const totalVideos = 4;
-  const nextVideoRef = useRef(null);
+  const nextVideoRef = useRef<HTMLVideoElement>(null);
 
   const upcomingVideoIndex = (currentIndex % totalVideos) + 1;
   const handleMiniVideoClick = () => {
@@ -21,6 +23,34 @@ function Hero() {
   const handleVideoLoad = () => {
     setNLoadedVideos((prev) => prev + 1);
   };
+
+  useGSAP(
+    () => {
+      if (hasClicked) {
+        gsap.set("#next-video", { visibility: "visible" });
+
+        gsap.to("#next-video", {
+          transformOrigin: "center center",
+          scale: 1,
+          width: "100%",
+          height: "100%",
+          duration: 1,
+          ease: "power1.inOut",
+          onStart: () => {
+            nextVideoRef.current!.play();
+          },
+        });
+
+        gsap.from("#current-video", {
+          transformOrigin: "center center",
+          scale: 0,
+          duration: 1.5,
+          ease: "power1.inOut",
+        });
+      }
+    },
+    { dependencies: [currentIndex], revertOnUpdate: true }
+  );
 
   return (
     <div className="relative h-dvh w-screen overflow-x-hidden">
